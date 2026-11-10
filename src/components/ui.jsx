@@ -54,27 +54,42 @@ export function Reveal({
    Активная секция для подсветки навигации
    ───────────────────────────────────────────────────────────── */
 
+/**
+ * Возвращает id секции, которая сейчас «читается».
+ * Берём ВСЕ секции страницы (не только пункты меню) по порядку сверху вниз:
+ * активна последняя, верх которой уже поднялся выше «линии чтения»
+ * (чуть ниже шапки). Так подсветка никогда не залипает на соседнем разделе.
+ * Массив ids должен быть стабильным (константа вне компонента).
+ */
 export function useActiveSection(ids) {
   const [active, setActive] = useState("");
 
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
+    let frame = 0;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(`#${visible.target.id}`);
-      },
-      { threshold: [0.2, 0.5], rootMargin: "-20% 0px -50% 0px" }
-    );
+    const update = () => {
+      frame = 0;
+      const line = 80 + window.innerHeight * 0.2;
+      let current = "";
+      for (const id of ids) {
+        const el = document.querySelector(id);
+        if (el && el.getBoundingClientRect().top <= line) current = id;
+      }
+      setActive(current);
+    };
 
-    ids.forEach((id) => {
-      const el = document.querySelector(id);
-      if (el) io.observe(el);
-    });
-    return () => io.disconnect();
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
   }, [ids]);
 
   return active;

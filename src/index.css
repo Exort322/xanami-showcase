@@ -13,6 +13,7 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem; /* заголовок раздела не прячется под шапкой */
     -webkit-text-size-adjust: 100%;
   }
 

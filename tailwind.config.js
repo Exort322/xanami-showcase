@@ -43,7 +43,7 @@ export default {
         },
       },
       animation: {
-        marquee: "marquee 38s linear infinite",
+        marquee: "marquee 110s linear infinite",
         rise: "rise 1.1s cubic-bezier(0.16,1,0.3,1) both",
         breathe: "breathe 9s ease-in-out infinite",
         scrollCue: "scrollCue 2.6s ease-in-out infinite",
