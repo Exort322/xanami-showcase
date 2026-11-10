@@ -8,77 +8,101 @@ export default function Hero() {
       id="top"
       className="relative flex min-h-[100svh] flex-col overflow-hidden"
     >
-      {/* фон: фото платья + затемнение + бордовое свечение */}
       <div className="absolute inset-0">
         <img
-          src="/assets/couture_burgundy_veil.jpg"
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full object-cover object-[center_22%] opacity-45 md:object-[center_30%]"
+          src="/assets/hero_veil.jpg"
+          alt="Платье Veil of Ash — бордовый корсет с кружевом и фатой"
+          className="h-full w-full object-cover object-[center_20%] opacity-55 md:object-[center_28%]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/60" />
-        <div className="absolute inset-0 animate-breathe bg-[radial-gradient(ellipse_at_75%_35%,rgba(155,20,32,0.30),transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/55" />
+        <div className="absolute inset-0 animate-breathe bg-[radial-gradient(ellipse_at_72%_32%,rgba(155,20,32,0.30),transparent_58%)]" />
         <div className="u-noise absolute inset-0" />
       </div>
 
       <div className="u-container relative z-10 flex flex-1 flex-col justify-center pb-16 pt-28 sm:pt-32">
         <Reveal className="mb-7 flex items-center gap-4">
           <span className="h-px w-10 bg-blood" />
-          <span className="u-eyebrow">Минск · Made to order</span>
+          <span className="u-eyebrow">Авторские эскизы · Ручная работа</span>
         </Reveal>
 
-        <h1 className="font-serif font-light leading-[0.9] text-bone u-text-balance">
-          <Reveal as="span" delay={120} className="block text-[clamp(3.6rem,13vw,11.5rem)] tracking-[0.05em]">
+        <h1 className="font-serif font-light leading-[0.92] text-bone u-text-balance">
+          <Reveal
+            as="span"
+            delay={120}
+            className="block text-[clamp(3.2rem,12vw,10.5rem)] tracking-[0.05em]"
+          >
             XANAMI
           </Reveal>
           <Reveal
             as="span"
             delay={260}
-            className="mt-5 block text-[clamp(1.4rem,4vw,3.25rem)] italic text-silver"
+            className="mt-5 block text-[clamp(1.25rem,3.6vw,2.9rem)] italic text-silver"
           >
-            Gothic Couture <span className="not-italic text-blood">&amp;</span> Dark Streetwear
+            Gothic Couture <span className="not-italic text-blood">&amp;</span> Dark
+            Streetwear
           </Reveal>
         </h1>
 
         <Reveal delay={420} className="mt-8 max-w-xl">
           <p className="text-sm font-light leading-relaxed text-silver/90 sm:text-base">
-            Ручная работа, индивидуальный пошив и лимитированные дропы. Вечерние
-            платья, корсеты и кружево — и тяжёлая streetwear-фактура: зипки и
-            деним малыми партиями.
+            Вечерние платья и повседневные вещи в единственном экземпляре. Всё шьётся
+            под заказ по вашим меркам — по авторским эскизам, без склада и повторов.
           </p>
         </Reveal>
 
         <Reveal delay={560} className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <a href="#couture" className="u-btn u-btn-ghost">
-            Исследовать коллекцию
+          <a href="#catalog" className="u-btn u-btn-solid">
+            Смотреть каталог
             <ArrowDown size={14} strokeWidth={1.5} />
           </a>
+          <a href="#order" className="u-btn u-btn-ghost">
+            <Send size={14} strokeWidth={1.5} />
+            Оставить заявку
+          </a>
+        </Reveal>
+
+        <Reveal delay={700} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <span className="font-cond text-[10px] uppercase tracking-[0.24em] text-ash">
+            Доставка СДЭК
+          </span>
+          <span className="h-1 w-1 bg-white/20" />
+          <span className="font-cond text-[10px] uppercase tracking-[0.24em] text-ash">
+            РФ · Беларусь · за рубеж
+          </span>
+          <span className="h-1 w-1 bg-white/20" />
           <a
             href={TG_TAILOR}
             target="_blank"
             rel="noopener noreferrer"
-            className="u-btn u-btn-solid"
+            className="font-cond text-[10px] uppercase tracking-[0.24em] text-silver underline decoration-white/20 underline-offset-4 transition-colors hover:text-bone"
           >
-            <Send size={14} strokeWidth={1.5} />
-            Связаться в TG
+            Telegram
           </a>
         </Reveal>
       </div>
 
-      {/* бегущая строка */}
       <div className="relative z-10 overflow-hidden border-y border-white/10 bg-ink/60 py-4 backdrop-blur-md">
-        <div className="flex w-max animate-marquee">
-          {[...MARQUEE, ...MARQUEE].map((text, i) => (
-            <span
-              key={i}
-              className="flex shrink-0 items-center gap-8 px-4 font-cond text-[11px] uppercase tracking-[0.3em] text-silver"
+        {/*
+          Две одинаковые группы, каждая не уже экрана (min-w-full) и сама
+          уезжает на свою ширину влево — стык бесшовный на любом мониторе.
+        */}
+        <div className="flex" aria-hidden="true">
+          {[0, 1].map((copy) => (
+            <div
+              key={copy}
+              className="flex min-w-full shrink-0 animate-marquee items-center justify-around"
             >
-              {text}
-              <span aria-hidden="true" className="text-blood">
-                ✦
-              </span>
-            </span>
+              {[...MARQUEE, ...MARQUEE, ...MARQUEE].map((text, i) => (
+                <span
+                  key={i}
+                  className="flex shrink-0 items-center gap-8 px-4 font-cond text-[11px] uppercase tracking-[0.3em] text-silver"
+                >
+                  {text}
+                  <span className="text-blood">✦</span>
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </div>
