@@ -81,21 +81,23 @@ export default function Catalog({ products, onOpenProduct, category, onCategory 
           {filtered.length} {filtered.length === 1 ? "изделие" : "изделий"}
         </p>
 
-        {/* сетка */}
+        {/* сетка.
+            Карточки намеренно НЕ обёрнуты в Reveal: IntersectionObserver
+            не успевал навесить .is-in на дальние карточки, они оставались
+            с opacity: 0 и просвечивал серый фон сетки (bg-white/10).
+            Шапка раздела и остальные секции анимируются как раньше. */}
         <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item, i) => (
-            <Reveal
+          {filtered.map((item) => (
+            <article
               key={item.id}
-              as="article"
-              delay={Math.min(i, 5) * 70}
               className="group relative flex flex-col bg-ink"
             >
-              <div className="relative aspect-[4/5] overflow-hidden">
+              <div className="relative aspect-[4/5] overflow-hidden bg-coal">
                 <img
                   src={item.img}
                   alt={item.name}
-                  loading="lazy"
-                  decoding="async"
+                  loading="eager"
+                  decoding="sync"
                   className="h-full w-full object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
@@ -142,7 +144,7 @@ export default function Catalog({ products, onOpenProduct, category, onCategory 
                   </button>
                 </div>
               </div>
-            </Reveal>
+            </article>
           ))}
         </div>
 

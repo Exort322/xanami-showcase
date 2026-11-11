@@ -13,7 +13,7 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem; /* заголовок раздела не прячется под шапкой */
+    scroll-padding-top: 5rem;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -81,8 +81,6 @@
     @apply border border-white/10;
   }
 
-  /* ── Кнопки ───────────────────────────────────────────────── */
-
   .u-btn {
     @apply relative inline-flex select-none items-center justify-center gap-2.5 whitespace-nowrap border px-7 py-4 font-cond text-[11px] uppercase tracking-[0.24em] transition-all duration-500 sm:text-xs;
   }
@@ -103,13 +101,10 @@
     @apply cursor-not-allowed border-white/10 bg-white/[0.02] text-ash;
   }
 
-  /* ── Ссылки навигации ────────────────────────────────────── */
-
   .u-nav {
     @apply relative font-cond text-[11px] uppercase tracking-[0.28em] text-silver transition-colors duration-300 hover:text-bone;
   }
 
-  /* зерно поверх изображений и фонов */
   .u-noise::after {
     content: "";
     position: absolute;
@@ -120,13 +115,8 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
 
-  /* ── Ячейка сетки преимуществ ────────────────────────────── */
-
-  /* Линии сетки рисуются зазорами (gap-px) на подложке bg-white/10,
-     а не бордерами/тенями на краях ячейки. Дополнительно запрещаем
-     ячейке становиться отдельным композитным слоем: Chrome округляет
-     границы слоя до целых пикселей, и на дробной ширине (например
-     446.5px) крайняя линия обрезалась. */
+  /* Ячейки сетки преимуществ: линии рисуются зазорами gap-px,
+     а слой не создаём, чтобы дробные границы не обрезались. */
   .adv-cell {
     will-change: auto;
     transform: none;
@@ -144,9 +134,6 @@
       filter 1s ease;
   }
 
-  /* will-change держим только пока элемент анимируется.
-     После появления слой снимается — иначе дробные границы
-     композитного слоя снова подрезают крайние пиксели контента. */
   .u-reveal:not(.is-in) {
     will-change: opacity, transform;
   }
@@ -154,8 +141,6 @@
   .u-reveal.is-in {
     opacity: 1;
     transform: none;
-    /* именно none, а не blur(0): filter со значением blur(0)
-       тоже создаёт композитный слой в Chrome */
     filter: none;
     will-change: auto;
   }

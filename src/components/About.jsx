@@ -46,14 +46,14 @@ export default function About() {
           </div>
         </div>
 
-        <div className="mt-14 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid border-t border-l border-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {ABOUT.advantages.map((item, i) => {
             const Icon = ICONS[i];
             return (
               <Reveal
                 key={item.title}
                 delay={i * 90}
-                className="flex flex-col gap-4 bg-ink p-6 transition-colors duration-500 hover:bg-white/[0.02] sm:p-7"
+                className="flex flex-col gap-4 border-r border-b border-white/10 bg-ink p-6 transition-colors duration-500 hover:bg-white/[0.02] sm:p-7"
               >
                 <Icon size={20} strokeWidth={1.25} className="text-blood" />
                 <div>

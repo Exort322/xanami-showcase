@@ -69,7 +69,7 @@ export const PRODUCTS = [
     kind: "Вечернее платье · корсет · фата",
     price: null,
     img: "/assets/hero_veil.jpg",
-    gallery: ["/assets/couture_white_gown.jpg"],
+    gallery: ["/assets/couture_burgundy_veil.jpg"],
     photoStatus: "studio",
     meta: "Бордо · чёрное кружево · фата из фатина",
     description:
@@ -83,7 +83,7 @@ export const PRODUCTS = [
     kind: "Корсет · жемчуг · шлейф",
     price: null,
     img: "/assets/couture_white_gown.jpg",
-    gallery: ["/assets/hero_veil.jpg"],
+    gallery: ["/assets/couture_white_ruffle.jpg"],
     photoStatus: "studio",
     meta: "Айвори · жемчужные нити · атлас",
     description:
@@ -267,25 +267,11 @@ export const PRODUCTS = [
     kind: "Джинсы · люверсы · ремни",
     price: null,
     img: "/assets/street_denim_branch.jpg",
-    gallery: ["/assets/street_denim_worn.jpg"],
-    photoStatus: "reshoot",
+    gallery: ["/assets/street_denim_flatlay.jpg", "/assets/street_denim_worn.jpg"],
+    photoStatus: "studio",
     meta: "Чёрный деним · контрастная строчка",
     description:
       "Чёрные джинсы с люверсами, ремнями и контрастной отстрочкой. Посадка по вашим меркам.",
-    size: "по вашим меркам",
-  },
-  {
-    id: "denim-set",
-    name: "Hardware Set",
-    category: "denim",
-    kind: "Зипка + джинсы · люверсы",
-    price: null,
-    img: "/assets/street_denim_flatlay.jpg",
-    gallery: [],
-    photoStatus: "reshoot",
-    meta: "Чёрный · матовая фурнитура",
-    description:
-      "Комплект из зипки и джинсов с люверсами и матовой фурнитурой. Собирается как капсула.",
     size: "по вашим меркам",
   },
 ];
