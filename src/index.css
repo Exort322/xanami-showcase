@@ -119,6 +119,18 @@
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
+
+  /* ── Ячейка сетки преимуществ ────────────────────────────── */
+
+  /* Линии сетки рисуются зазорами (gap-px) на подложке bg-white/10,
+     а не бордерами/тенями на краях ячейки. Дополнительно запрещаем
+     ячейке становиться отдельным композитным слоем: Chrome округляет
+     границы слоя до целых пикселей, и на дробной ширине (например
+     446.5px) крайняя линия обрезалась. */
+  .adv-cell {
+    will-change: auto;
+    transform: none;
+  }
 }
 
 @layer utilities {
@@ -130,12 +142,22 @@
       opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
       transform 1.1s cubic-bezier(0.16, 1, 0.3, 1),
       filter 1s ease;
+  }
+
+  /* will-change держим только пока элемент анимируется.
+     После появления слой снимается — иначе дробные границы
+     композитного слоя снова подрезают крайние пиксели контента. */
+  .u-reveal:not(.is-in) {
     will-change: opacity, transform;
   }
+
   .u-reveal.is-in {
     opacity: 1;
     transform: none;
-    filter: blur(0);
+    /* именно none, а не blur(0): filter со значением blur(0)
+       тоже создаёт композитный слой в Chrome */
+    filter: none;
+    will-change: auto;
   }
 
   .u-mask-b {
