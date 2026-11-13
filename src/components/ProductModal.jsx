@@ -148,7 +148,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
                   Оплата
                 </dt>
                 <dd className="text-right text-sm text-silver">
-                  {prepayFor(product.category)}
+                  {product.payment || prepayFor(product.category)}
                 </dd>
               </div>
             </dl>
