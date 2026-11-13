@@ -13,7 +13,7 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 5rem; /* заголовок раздела не прячется под шапкой */
     -webkit-text-size-adjust: 100%;
   }
 
@@ -81,6 +81,8 @@
     @apply border border-white/10;
   }
 
+  /* ── Кнопки ───────────────────────────────────────────────── */
+
   .u-btn {
     @apply relative inline-flex select-none items-center justify-center gap-2.5 whitespace-nowrap border px-7 py-4 font-cond text-[11px] uppercase tracking-[0.24em] transition-all duration-500 sm:text-xs;
   }
@@ -101,10 +103,13 @@
     @apply cursor-not-allowed border-white/10 bg-white/[0.02] text-ash;
   }
 
+  /* ── Ссылки навигации ────────────────────────────────────── */
+
   .u-nav {
     @apply relative font-cond text-[11px] uppercase tracking-[0.28em] text-silver transition-colors duration-300 hover:text-bone;
   }
 
+  /* зерно поверх изображений и фонов */
   .u-noise::after {
     content: "";
     position: absolute;
@@ -115,8 +120,13 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
 
-  /* Ячейки сетки преимуществ: линии рисуются зазорами gap-px,
-     а слой не создаём, чтобы дробные границы не обрезались. */
+  /* ── Ячейка сетки преимуществ ────────────────────────────── */
+
+  /* Линии сетки рисуются зазорами (gap-px) на подложке bg-white/10,
+     а не бордерами/тенями на краях ячейки. Дополнительно запрещаем
+     ячейке становиться отдельным композитным слоем: Chrome округляет
+     границы слоя до целых пикселей, и на дробной ширине (например
+     446.5px) крайняя линия обрезалась. */
   .adv-cell {
     will-change: auto;
     transform: none;
@@ -124,26 +134,32 @@
 }
 
 @layer utilities {
-  .u-reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    filter: blur(8px);
-    transition:
-      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 1.1s cubic-bezier(0.16, 1, 0.3, 1),
-      filter 1s ease;
-  }
+  /* ── Появление секций ─────────────────────────────────────────
+     Контент виден сразу и не «доезжает» при прокрутке.
+     Раньше здесь были opacity: 0 + translateY(28px) + blur(8px),
+     из-за чего каталог и таблицы выглядели как подгружающиеся.
 
-  .u-reveal:not(.is-in) {
-    will-change: opacity, transform;
-  }
-
+     Если когда-нибудь захочешь вернуть анимацию — раскомментируй
+     блок ниже (без translateY и blur: они и создавали ощущение
+     подгрузки контента). */
+  .u-reveal,
   .u-reveal.is-in {
     opacity: 1;
     transform: none;
     filter: none;
+    transition: none;
     will-change: auto;
   }
+
+  /*
+  .u-reveal {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .u-reveal.is-in {
+    opacity: 1;
+  }
+  */
 
   .u-mask-b {
     -webkit-mask-image: linear-gradient(to bottom, #000 52%, transparent 100%);

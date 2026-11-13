@@ -58,7 +58,7 @@ export default function DualIdentity({ onOpenCategory }) {
                 src={side.img}
                 alt=""
                 aria-hidden="true"
-                loading="lazy"
+                loading="eager"
                 decoding="async"
                 className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1.4s] ease-out ${
                   dimmed
