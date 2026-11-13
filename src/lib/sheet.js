@@ -73,23 +73,18 @@ const normalize = (value) => (value || "").trim();
 function normalizeGoogleDriveUrl(url) {
   if (!url) return url;
 
-  // 1. Если это уже прямой формат — возвращаем как есть
   if (/googleusercontent\.com\/d\//.test(url) ||
       /drive\.google\.com\/(uc\?export=view|thumbnail)/.test(url)) {
     return url;
   }
 
-  // 2. Извлекаем FILE_ID из стандартной ссылки
-  // Пример: https://drive.google.com/file/d/13nTC_av.../view?usp=sharing
   const match = url.match(/\/file\/d\/([^/]+)/) ||
                 url.match(/[?&]id=([^&]+)/);
   if (match) {
     const fileId = match[1];
-    // Наиболее надёжный формат для <img>
     return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
 
-  // 3. Если ничего не совпало — возвращаем исходную ссылку
   return url;
 }
 
@@ -105,12 +100,8 @@ function extractImages(cellValue) {
   
   return parts.map(part => {
     let url = part.trim();
-
-    // Извлекаем URL из формулы =IMAGE("...")
     const match = url.match(/=IMAGE\(\s*["']?([^"')]+)["']?\s*\)/i);
     if (match) url = match[1];
-
-    // Нормализуем ссылку Google Диска
     return normalizeGoogleDriveUrl(url.trim());
   }).filter(url => url.length > 0);
 }
@@ -180,12 +171,23 @@ export function rowsToProducts(rows) {
 export async function loadCatalog(fallback) {
   if (!SHEET_CSV_URL) return fallback;
 
+  // Таймаут 4 секунды, чтобы не держать экран загрузки вечно
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+
   try {
-    const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+    const res = await fetch(SHEET_CSV_URL, { 
+      cache: "no-store",
+      signal: controller.signal 
+    });
+    
+    clearTimeout(timeoutId);
+    
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const items = rowsToProducts(parseCsv(await res.text()));
     return items.length ? items : fallback;
   } catch (err) {
+    clearTimeout(timeoutId);
     console.warn("Каталог из таблицы не загрузился, показываю локальный:", err);
     return fallback;
   }

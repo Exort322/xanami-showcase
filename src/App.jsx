@@ -17,16 +17,19 @@ import { PRODUCTS } from "./data/content.js";
 import { loadCatalog } from "./lib/sheet.js";
 
 export default function App() {
-  const [products, setProducts] = useState(PRODUCTS);
+  const [products, setProducts] = useState(null); // null = загрузка
+  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("all");
   const [active, setActive] = useState(null);
   const [preset, setPreset] = useState(null);
 
-  // каталог можно подгрузить из Google Таблицы (см. src/lib/sheet.js)
   useEffect(() => {
     let alive = true;
     loadCatalog(PRODUCTS).then((items) => {
-      if (alive) setProducts(items);
+      if (alive) {
+        setProducts(items);
+        setLoading(false);
+      }
     });
     return () => {
       alive = false;
@@ -44,7 +47,7 @@ export default function App() {
 
   const openFeatured = useCallback(
     (id) => {
-      const found = products.find((p) => p.id === id);
+      const found = products?.find((p) => p.id === id);
       if (found) setActive(found);
     },
     [products]
@@ -58,7 +61,7 @@ export default function App() {
   }, []);
 
   const visible = useMemo(
-    () => (category === "all" ? products : products.filter((p) => p.category === category)),
+    () => (products ? (category === "all" ? products : products.filter((p) => p.category === category)) : []),
     [products, category]
   );
 
@@ -71,7 +74,8 @@ export default function App() {
         <About />
         <DualIdentity onOpenCategory={openCategory} />
         <Catalog
-          products={products}
+          products={products || []}
+          isLoading={loading}
           category={category}
           onCategory={setCategory}
           onOpenProduct={openProduct}
@@ -81,7 +85,7 @@ export default function App() {
         <Delivery />
         <Faq />
         <OrderForm
-          products={visible.length ? visible : products}
+          products={visible.length ? visible : (products || [])}
           preset={preset}
           onPresetConsumed={() => setPreset(null)}
         />

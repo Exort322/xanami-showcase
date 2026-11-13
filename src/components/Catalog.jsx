@@ -6,7 +6,7 @@ import { PhotoNote, Reveal, SectionHead } from "./ui.jsx";
 const formatPrice = (value) =>
   value ? `${value.toLocaleString("ru-RU")} ₽` : "по запросу";
 
-export default function Catalog({ products, onOpenProduct, category, onCategory }) {
+export default function Catalog({ products, onOpenProduct, category, onCategory, isLoading }) {
   const [sort, setSort] = useState("default");
 
   const filtered = useMemo(() => {
@@ -78,77 +78,92 @@ export default function Catalog({ products, onOpenProduct, category, onCategory 
         </div>
 
         <p className="mt-5 font-cond text-[10px] uppercase tracking-[0.22em] text-ash">
-          {filtered.length} {filtered.length === 1 ? "изделие" : "изделий"}
+          {isLoading ? "Загрузка..." : `${filtered.length} ${filtered.length === 1 ? "изделие" : "изделий"}`}
         </p>
 
-        {/* сетка.
-            Карточки намеренно НЕ обёрнуты в Reveal: IntersectionObserver
-            не успевал навесить .is-in на дальние карточки, они оставались
-            с opacity: 0 и просвечивал серый фон сетки (bg-white/10).
-            Шапка раздела и остальные секции анимируются как раньше. */}
-        <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item) => (
-            <article
-              key={item.id}
-              className="group relative flex flex-col bg-ink"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden bg-coal">
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  loading="eager"
-                  decoding="sync"
-                  className="h-full w-full object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
-                <div className="absolute left-3 top-3">
-                  <PhotoNote updated={item.photoStatus === "studio"} />
+        {/* Скелетон загрузки */}
+        {isLoading ? (
+          <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex flex-col bg-ink">
+                <div className="relative aspect-[4/5] animate-pulse bg-coal" />
+                <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
+                  <div className="h-3 w-1/3 animate-pulse bg-white/10" />
+                  <div className="h-6 w-2/3 animate-pulse bg-white/10" />
+                  <div className="h-3 w-1/2 animate-pulse bg-white/10" />
+                  <div className="mt-auto flex items-end justify-between border-t border-white/10 pt-4">
+                    <div className="h-5 w-1/4 animate-pulse bg-white/10" />
+                    <div className="h-4 w-1/5 animate-pulse bg-white/10" />
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenProduct(item)}
-                  aria-label={`Подробнее: ${item.name}`}
-                  className="absolute inset-0"
-                >
-                  <span className="sr-only">Подробнее</span>
-                </button>
               </div>
-
-              <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
-                <div>
-                  <p className="u-eyebrow truncate text-[9px]">{item.kind}</p>
-                  <h3 className="mt-2 font-serif text-2xl font-light text-bone">
-                    {item.name}
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ash">
-                    {item.meta}
-                  </p>
-                </div>
-
-                <div className="mt-auto flex items-end justify-between gap-3 border-t border-white/10 pt-4">
-                  <div>
-                    <p className="font-cond text-[9px] uppercase tracking-[0.22em] text-ash">
-                      Цена
-                    </p>
-                    <p className="mt-1 font-serif text-lg text-bone">
-                      {formatPrice(item.price)}
-                    </p>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((item) => (
+              <article
+                key={item.id}
+                className="group relative flex flex-col bg-ink"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden bg-coal">
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    loading="eager"
+                    decoding="sync"
+                    className="h-full w-full object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
+                  <div className="absolute left-3 top-3">
+                    <PhotoNote updated={item.photoStatus === "studio"} />
                   </div>
                   <button
                     type="button"
                     onClick={() => onOpenProduct(item)}
-                    className="inline-flex items-center gap-1.5 font-cond text-[10px] uppercase tracking-[0.2em] text-silver transition-colors hover:text-bone"
+                    aria-label={`Подробнее: ${item.name}`}
+                    className="absolute inset-0"
                   >
-                    Подробнее
-                    <ArrowRight size={13} strokeWidth={1.5} />
+                    <span className="sr-only">Подробнее</span>
                   </button>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
 
-        {!filtered.length && (
+                <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
+                  <div>
+                    <p className="u-eyebrow truncate text-[9px]">{item.kind}</p>
+                    <h3 className="mt-2 font-serif text-2xl font-light text-bone">
+                      {item.name}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ash">
+                      {item.meta}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto flex items-end justify-between gap-3 border-t border-white/10 pt-4">
+                    <div>
+                      <p className="font-cond text-[9px] uppercase tracking-[0.22em] text-ash">
+                        Цена
+                      </p>
+                      <p className="mt-1 font-serif text-lg text-bone">
+                        {formatPrice(item.price)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onOpenProduct(item)}
+                      className="inline-flex items-center gap-1.5 font-cond text-[10px] uppercase tracking-[0.2em] text-silver transition-colors hover:text-bone"
+                    >
+                      Подробнее
+                      <ArrowRight size={13} strokeWidth={1.5} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && !filtered.length && (
           <p className="mt-10 text-center text-sm text-ash">
             В этой категории пока пусто.
           </p>
