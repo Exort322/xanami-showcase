@@ -158,7 +158,7 @@ export default function Catalog({ products, categories, onOpenProduct, category,
                       <p className="font-cond text-[9px] uppercase tracking-[0.22em] text-ash">
                         Цена
                       </p>
-                      <p className="mt-1 font-serif text-lg text-bone">
+                      <p className="mt-1 font-cond text-lg text-bone">
                         {formatPrice(item.price)}
                       </p>
                     </div>

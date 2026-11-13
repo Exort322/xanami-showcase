@@ -130,7 +130,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
                   Цена
                 </dt>
                 <dd
-                  className={`font-serif text-xl ${
+                  className={`font-cond text-xl ${
                     product.price ? "text-bone" : "text-silver"
                   }`}
                 >
