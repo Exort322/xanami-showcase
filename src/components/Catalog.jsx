@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
-import { CATEGORIES } from "../data/content.js";
 import { PhotoNote, Reveal, SectionHead } from "./ui.jsx";
 
 const formatPrice = (value) =>
   value ? `${value.toLocaleString("ru-RU")} ₽` : "по запросу";
 
-export default function Catalog({ products, onOpenProduct, category, onCategory, isLoading }) {
+export default function Catalog({ products, categories, onOpenProduct, category, onCategory, isLoading }) {
   const [sort, setSort] = useState("default");
 
   const filtered = useMemo(() => {
@@ -15,7 +14,7 @@ export default function Catalog({ products, onOpenProduct, category, onCategory,
     if (sort === "price-asc") {
       return [...list].sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
     }
-    if (sort === "price-desc") {
+  if (sort === "price-desc") {
       return [...list].sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
     }
     return list;
@@ -39,7 +38,22 @@ export default function Catalog({ products, onOpenProduct, category, onCategory,
             aria-label="Категории изделий"
             className="-mx-1 flex gap-1 overflow-x-auto pb-1 sm:pb-0"
           >
-            {CATEGORIES.map((cat) => {
+            {/* Добавляем "Все изделия" в начало */}
+            <button
+              role="tab"
+              aria-selected={category === "all"}
+              onClick={() => onCategory("all")}
+              className={`shrink-0 border px-4 py-2.5 font-cond text-[10px] uppercase tracking-[0.2em] transition-all duration-300 sm:text-[11px] ${
+                category === "all"
+                  ? "border-bone bg-bone text-ink"
+                  : "border-white/10 bg-transparent text-silver hover:border-white/30 hover:text-bone"
+              }`}
+            >
+              Все изделия
+            </button>
+
+            {/* Остальные категории (из таблицы и базовые) */}
+            {categories.filter(c => c.id !== "all").map((cat) => {
               const activeCat = category === cat.id;
               return (
                 <button

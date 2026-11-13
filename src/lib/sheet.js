@@ -1,12 +1,9 @@
 /**
  * Загрузка каталога из Google Таблицы (опционально).
- * 
- * Колонки: id, Название, Категория, Подзаголовок, Цена, Фото, Галерея, Описание, Ткани, Фото-статус, Размер, Оплата
  */
 
 export const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1kRYpG0VuA_--ZtWgz4CnSFi6-hpKYA62EQsOa1vYTrZEvoC3Roh3nhpv8mZVv9fgmL__KGmC03r-/pub?gid=0&single=true&output=csv";
 
-/** Простой CSV-парсер: понимает кавычки, запятые и переносы внутри поля. */
 export function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -52,6 +49,7 @@ export function parseCsv(text) {
   return rows.filter((r) => r.some((cell) => cell.trim() !== ""));
 }
 
+// Базовые категории, чтобы не сломать старые ссылки
 const CATEGORY_MAP = {
   платья: "dresses",
   платье: "dresses",
@@ -66,38 +64,21 @@ const CATEGORY_MAP = {
 
 const normalize = (value) => (value || "").trim();
 
-/** 
- * Преобразует стандартную ссылку Google Диска в прямой URL изображения.
- * Поддерживает ссылки вида /file/d/ID/view, /open?id=ID и уже прямые форматы.
- */
 function normalizeGoogleDriveUrl(url) {
   if (!url) return url;
-
-  if (/googleusercontent\.com\/d\//.test(url) ||
-      /drive\.google\.com\/(uc\?export=view|thumbnail)/.test(url)) {
+  if (/googleusercontent\.com\/d\//.test(url) || /drive\.google\.com\/(uc\?export=view|thumbnail)/.test(url)) {
     return url;
   }
-
-  const match = url.match(/\/file\/d\/([^/]+)/) ||
-                url.match(/[?&]id=([^&]+)/);
+  const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
   if (match) {
-    const fileId = match[1];
-    return `https://lh3.googleusercontent.com/d/${fileId}`;
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
   }
-
   return url;
 }
 
-/** 
- * Извлекает ссылки на изображения из ячейки.
- * Поддерживает: =IMAGE("url"), прямые ссылки, списки через запятую.
- * Каждая извлечённая ссылка проходит нормализацию для Google Диска.
- */
 function extractImages(cellValue) {
   if (!cellValue) return [];
-  
   const parts = cellValue.split(/[,\n;]+/);
-  
   return parts.map(part => {
     let url = part.trim();
     const match = url.match(/=IMAGE\(\s*["']?([^"')]+)["']?\s*\)/i);
@@ -106,7 +87,6 @@ function extractImages(cellValue) {
   }).filter(url => url.length > 0);
 }
 
-/** Превращает строки таблицы в объекты каталога. */
 export function rowsToProducts(rows) {
   if (rows.length < 2) return [];
 
@@ -139,7 +119,14 @@ export function rowsToProducts(rows) {
       if (!name) return null;
 
       const rawPrice = pick(row, cols.price).replace(/[^\d]/g, "");
-      const category = CATEGORY_MAP[pick(row, cols.category).toLowerCase()] || "dresses";
+      
+      // Логика определения категории
+      const rawCategory = pick(row, cols.category);
+      const lowerCat = rawCategory.toLowerCase();
+      // Если это старая категория — берем её ID, если новая — делаем slug из названия
+      const categoryId = CATEGORY_MAP[lowerCat] || lowerCat.replace(/[^a-zа-яё0-9]+/gi, '-');
+      // Красивое название для кнопки фильтра (с заглавной буквы)
+      const categoryLabel = rawCategory ? rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1) : "Прочее";
 
       const mainPhotos = extractImages(pick(row, cols.img));
       const galleryPhotos = extractImages(pick(row, cols.gallery));
@@ -150,14 +137,13 @@ export function rowsToProducts(rows) {
       return {
         id: pick(row, cols.id) || `sheet-${i}`,
         name,
-        category,
+        category: categoryId,
+        categoryLabel: categoryLabel, // Сохраняем красивое название
         kind: pick(row, cols.kind),
         price: rawPrice ? Number(rawPrice) : null,
         img: mainImg,
         gallery: gallery,
-        photoStatus: /обнов|reshoot/i.test(pick(row, cols.photoStatus))
-          ? "reshoot"
-          : "studio",
+        photoStatus: /обнов|reshoot/i.test(pick(row, cols.photoStatus)) ? "reshoot" : "studio",
         meta: pick(row, cols.meta),
         description: pick(row, cols.description),
         size: pick(row, cols.size) || "по вашим меркам",
@@ -167,28 +153,41 @@ export function rowsToProducts(rows) {
     .filter(Boolean);
 }
 
-/** Возвращает каталог из таблицы либо локальный набор. */
-export async function loadCatalog(fallback) {
-  if (!SHEET_CSV_URL) return fallback;
+/** Возвращает каталог и список категорий */
+export async function loadCatalog(fallbackProducts, fallbackCategories) {
+  if (!SHEET_CSV_URL) return { products: fallbackProducts, categories: fallbackCategories };
 
-  // Таймаут 4 секунды, чтобы не держать экран загрузки вечно
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 4000);
 
   try {
-    const res = await fetch(SHEET_CSV_URL, { 
-      cache: "no-store",
-      signal: controller.signal 
-    });
-    
+    const res = await fetch(SHEET_CSV_URL, { cache: "no-store", signal: controller.signal });
     clearTimeout(timeoutId);
     
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const items = rowsToProducts(parseCsv(await res.text()));
-    return items.length ? items : fallback;
+    
+    if (!items.length) return { products: fallbackProducts, categories: fallbackCategories };
+
+    // Собираем уникальные категории из полученных товаров
+    const categoriesMap = new Map();
+    // Сначала добавляем дефолтные, чтобы они всегда были в списке
+    fallbackCategories.forEach(c => categoriesMap.set(c.id, c.label));
+    
+    // Добавляем новые из таблицы
+    items.forEach(p => {
+      if (!categoriesMap.has(p.category)) {
+        categoriesMap.set(p.category, p.categoryLabel);
+      }
+    });
+
+    // Превращаем Map обратно в массив объектов
+    const categories = Array.from(categoriesMap, ([id, label]) => ({ id, label }));
+
+    return { products: items, categories };
   } catch (err) {
     clearTimeout(timeoutId);
     console.warn("Каталог из таблицы не загрузился, показываю локальный:", err);
-    return fallback;
+    return { products: fallbackProducts, categories: fallbackCategories };
   }
 }

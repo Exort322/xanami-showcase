@@ -13,11 +13,12 @@ import Faq from "./components/Faq.jsx";
 import OrderForm from "./components/OrderForm.jsx";
 import Footer from "./components/Footer.jsx";
 
-import { PRODUCTS } from "./data/content.js";
+import { PRODUCTS, CATEGORIES } from "./data/content.js";
 import { loadCatalog } from "./lib/sheet.js";
 
 export default function App() {
-  const [products, setProducts] = useState(null); // null = загрузка
+  const [products, setProducts] = useState(null);
+  const [categories, setCategories] = useState(CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("all");
   const [active, setActive] = useState(null);
@@ -25,9 +26,10 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    loadCatalog(PRODUCTS).then((items) => {
+    loadCatalog(PRODUCTS, CATEGORIES).then(({ products: loadedProducts, categories: loadedCategories }) => {
       if (alive) {
-        setProducts(items);
+        setProducts(loadedProducts);
+        setCategories(loadedCategories);
         setLoading(false);
       }
     });
@@ -75,6 +77,7 @@ export default function App() {
         <DualIdentity onOpenCategory={openCategory} />
         <Catalog
           products={products || []}
+          categories={categories} // <-- Передаем категории
           isLoading={loading}
           category={category}
           onCategory={setCategory}
