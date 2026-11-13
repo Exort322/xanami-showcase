@@ -42,20 +42,33 @@ export default function OrderForm({ products, preset, onPresetConsumed }) {
   };
 
   const message = useMemo(() => {
+    // Находим полные данные о товаре, чтобы достать ссылку на обложку
+    const selectedProduct = products.find((p) => p.name === form.product);
+
     const lines = [
       "Заявка с сайта XANAMI",
       "",
       `Имя: ${form.name || "—"}`,
       `Связь: ${form.contact || "—"}`,
       `Изделие: ${form.product || "нужен совет"}`,
-      `Размер / мерки: ${form.size || "пришлю позже"}`,
-      `Желаемый срок: ${form.date || "не срочно"}`,
     ];
+
+    // Добавляем ссылку только на главное фото, если товар выбран
+    if (selectedProduct && selectedProduct.img) {
+      lines.push(`Фото: ${selectedProduct.img}`);
+    }
+
+    lines.push(
+      `Размер / мерки: ${form.size || "пришлю позже"}`,
+      `Желаемый срок: ${form.date || "не срочно"}`
+    );
+
     if (form.comment.trim()) {
       lines.push("", `Комментарий: ${form.comment.trim()}`);
     }
+
     return lines.join("\n");
-  }, [form]);
+  }, [form, products]);
 
   const submit = (e) => {
     e.preventDefault();
