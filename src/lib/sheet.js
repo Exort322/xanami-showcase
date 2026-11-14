@@ -2,7 +2,7 @@
  * Загрузка каталога из Google Таблицы (опционально).
  */
 
-export const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1kRYpG0VuA_--ZtWgz4CnSFi6-hpKYA62EQsOa1vYTrZEvoC3Roh3nhpv8mZVv9fgmL__KGmC03r-/pub?gid=0&single=true&output=csv";
+export const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaWL_6drAKJuqMdqaX9HiKrxjw0aLvk70vxeu2yMfyduoGZt8Qg-4WpdlrZlbBKVdkkgdXl_ljkaXS/pub?gid=1570090092&single=true&output=csv";
 
 export function parseCsv(text) {
   const rows = [];
