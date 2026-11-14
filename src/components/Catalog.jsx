@@ -97,9 +97,9 @@ export default function Catalog({ products, categories, onOpenProduct, category,
 
         {/* Скелетон загрузки */}
         {isLoading ? (
-          <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex flex-col bg-ink">
+              <div key={i} className="flex flex-col bg-ink border border-white/10">
                 <div className="relative aspect-[4/5] animate-pulse bg-coal" />
                 <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
                   <div className="h-3 w-1/3 animate-pulse bg-white/10" />
@@ -114,11 +114,11 @@ export default function Catalog({ products, categories, onOpenProduct, category,
             ))}
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 xs:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3">
             {filtered.map((item) => (
               <article
                 key={item.id}
-                className="group relative flex flex-col bg-ink"
+                className="group relative flex flex-col bg-ink border border-white/10"
               >
                 <div className="relative aspect-[4/5] overflow-hidden bg-coal">
                   <img
