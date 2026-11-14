@@ -4,7 +4,7 @@ import { FAQ } from "../data/content.js";
 import { Reveal, SectionHead } from "./ui.jsx";
 
 export default function Faq() {
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = useState(-1);
 
   return (
     <section id="faq" className="relative border-t border-white/10 bg-coal py-20 sm:py-28">
