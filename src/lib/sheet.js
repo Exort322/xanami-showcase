@@ -158,7 +158,7 @@ export async function loadCatalog(fallbackProducts, fallbackCategories) {
   if (!SHEET_CSV_URL) return { products: fallbackProducts, categories: fallbackCategories };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
     const res = await fetch(SHEET_CSV_URL, { cache: "no-store", signal: controller.signal });
