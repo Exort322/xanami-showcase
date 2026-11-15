@@ -9,15 +9,16 @@ const formatPrice = (value) =>
 export default function ProductModal({ product, onClose, onOrder }) {
   const [index, setIndex] = useState(0);
   
-  // Рефы для отслеживания свайпа
-  const touchStartX = useRef(null);
-  const touchEndX = useRef(null);
-  const minSwipeDistance = 50; // Минимальная длина свайпа в пикселях
+  // Состояния для свайпа
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchDelta, setTouchDelta] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const images = product ? [product.img, ...(product.gallery || [])].filter(Boolean) : [];
 
   useEffect(() => {
     setIndex(0);
+    setTouchDelta(0);
   }, [product]);
 
   useEffect(() => {
@@ -42,28 +43,37 @@ export default function ProductModal({ product, onClose, onOrder }) {
   }, [product, images.length, onClose]);
 
   const handleTouchStart = (e) => {
-    touchEndX.current = null;
-    touchStartX.current = e.targetTouches[0].clientX;
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsDragging(true);
   };
 
   const handleTouchMove = (e) => {
-    touchEndX.current = e.targetTouches[0].clientX;
+    if (!isDragging) return;
+    const currentX = e.targetTouches[0].clientX;
+    const delta = currentX - touchStart;
+    
+    // Ограничиваем свайп, если фото крайние (чтобы не утащить в пустоту)
+    if ((index === 0 && delta > 0) || (index === images.length - 1 && delta < 0)) {
+      setTouchDelta(delta * 0.2); // Сопротивление при свайпе за границы
+    } else {
+      setTouchDelta(delta);
+    }
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
-    
-    const distance = touchStartX.current - touchEndX.current;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+    setIsDragging(false);
+    const minSwipeDistance = 50;
 
-    if (isLeftSwipe) {
+    if (touchDelta < -minSwipeDistance && index < images.length - 1) {
       // Свайп влево -> следующее фото
-      setIndex((i) => (i + 1) % images.length);
-    } else if (isRightSwipe) {
+      setIndex(index + 1);
+    } else if (touchDelta > minSwipeDistance && index > 0) {
       // Свайп вправо -> предыдущее фото
-      setIndex((i) => (i - 1 + images.length) % images.length);
+      setIndex(index - 1);
     }
+    
+    // Возвращаем картинку в исходное положение
+    setTouchDelta(0);
   };
 
   if (!product) return null;
@@ -101,11 +111,25 @@ export default function ProductModal({ product, onClose, onOrder }) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <img
-              src={images[index]}
-              alt={`${product.name} — фото ${index + 1}`}
-              className="pointer-events-none h-full w-full object-cover"
-            />
+            {/* Лента картинок */}
+            <div 
+              className="flex h-full w-full"
+              style={{
+                transform: `translateX(calc(-${index * 100}% + ${touchDelta}px))`,
+                transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
+              }}
+            >
+              {images.map((img, i) => (
+                <div key={i} className="h-full w-full shrink-0">
+                  <img
+                    src={img}
+                    alt={`${product.name} — фото ${i + 1}`}
+                    className="pointer-events-none h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+
             <div className="absolute left-3 top-3">
               <PhotoNote updated={product.photoStatus === "studio"} />
             </div>
