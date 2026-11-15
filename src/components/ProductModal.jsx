@@ -48,7 +48,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
     };
   }, [product, images.length, onClose]);
 
-  // Синхронизируем позицию ленты при изменении index (например, по клику на стрелки или клавиатуре)
+  // Синхронизируем позицию ленты при изменении index
   useEffect(() => {
     if (!trackRef.current) return;
     trackRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
@@ -73,7 +73,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
     const deltaX = currentX - touchStartX.current;
     const deltaY = currentY - touchStartY.current;
 
-    // Определяем направление свайпа (если движение по горизонтали больше, чем по вертикали)
+    // Определяем направление свайпа
     if (!isHorizontalSwipe.current) {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         isHorizontalSwipe.current = true;
@@ -110,11 +110,11 @@ export default function ProductModal({ product, onClose, onOrder }) {
     // Получаем текущее смещение из style.transform
     const style = window.getComputedStyle(trackRef.current);
     const matrix = new WebKitCSSMatrix(style.transform);
-    const currentTranslate = matrix.m41; // смещение по X в пикселях
+    const currentTranslate = matrix.m41;
     const width = trackRef.current.offsetWidth;
     const currentPercent = (currentTranslate / width) * 100;
 
-    const minSwipePercent = 15; // Минимальный свайп для перелистывания (15% ширины)
+    const minSwipePercent = 15;
 
     let newIndex = index;
     if (currentPercent < -(index * 100 + minSwipePercent) && index < images.length - 1) {
@@ -193,21 +193,22 @@ export default function ProductModal({ product, onClose, onOrder }) {
 
             {images.length > 1 && (
               <>
+                {/* Убрали hidden md:flex, теперь стрелки видны всегда, на телефоне они чуть меньше */}
                 <button
                   type="button"
                   onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
                   aria-label="Предыдущее фото"
-                  className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 md:flex"
+                  className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 sm:left-3 sm:h-10 sm:w-10"
                 >
-                  <ChevronLeft size={16} strokeWidth={1.5} />
+                  <ChevronLeft size={16} strokeWidth={1.5} className="sm:h-4 sm:w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIndex((i) => (i + 1) % images.length)}
                   aria-label="Следующее фото"
-                  className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 md:flex"
+                  className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 sm:right-3 sm:h-10 sm:w-10"
                 >
-                  <ChevronRight size={16} strokeWidth={1.5} />
+                  <ChevronRight size={16} strokeWidth={1.5} className="sm:h-4 sm:w-4" />
                 </button>
                 <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
                   {images.map((_, i) => (
