@@ -9,16 +9,22 @@ const formatPrice = (value) =>
 export default function ProductModal({ product, onClose, onOrder }) {
   const [index, setIndex] = useState(0);
   
-  // Состояния для свайпа
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchDelta, setTouchDelta] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  // Рефы для свайпа
+  const trackRef = useRef(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isDragging = useRef(false);
+  const isHorizontalSwipe = useRef(false);
 
   const images = product ? [product.img, ...(product.gallery || [])].filter(Boolean) : [];
 
   useEffect(() => {
     setIndex(0);
-    setTouchDelta(0);
+    // Сбрасываем позицию при открытии нового товара
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = 'translateX(0px)';
+    }
   }, [product]);
 
   useEffect(() => {
@@ -42,39 +48,91 @@ export default function ProductModal({ product, onClose, onOrder }) {
     };
   }, [product, images.length, onClose]);
 
+  // Синхронизируем позицию ленты при изменении index (например, по клику на стрелки или клавиатуре)
+  useEffect(() => {
+    if (!trackRef.current) return;
+    trackRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+    trackRef.current.style.transform = `translateX(-${index * 100}%)`;
+  }, [index]);
+
   const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsDragging(true);
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    isDragging.current = true;
+    isHorizontalSwipe.current = false;
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'none';
+    }
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    const currentX = e.targetTouches[0].clientX;
-    const delta = currentX - touchStart;
+    if (!isDragging.current || !trackRef.current) return;
     
-    // Ограничиваем свайп, если фото крайние (чтобы не утащить в пустоту)
-    if ((index === 0 && delta > 0) || (index === images.length - 1 && delta < 0)) {
-      setTouchDelta(delta * 0.2); // Сопротивление при свайпе за границы
-    } else {
-      setTouchDelta(delta);
+    const currentX = e.targetTouches[0].clientX;
+    const currentY = e.targetTouches[0].clientY;
+    const deltaX = currentX - touchStartX.current;
+    const deltaY = currentY - touchStartY.current;
+
+    // Определяем направление свайпа (если движение по горизонтали больше, чем по вертикали)
+    if (!isHorizontalSwipe.current) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        isHorizontalSwipe.current = true;
+      } else {
+        // Если это вертикальный скролл, прерываем свайп
+        isDragging.current = false;
+        return;
+      }
     }
+
+    // Блокируем скролл страницы, если это горизонтальный свайп
+    if (isHorizontalSwipe.current && e.cancelable) {
+      e.preventDefault();
+    }
+
+    // Вычисляем смещение в процентах относительно ширины контейнера
+    const width = trackRef.current.offsetWidth;
+    let movePercent = (deltaX / width) * 100;
+    
+    // Ограничиваем свайп, если фото крайние
+    if ((index === 0 && deltaX > 0) || (index === images.length - 1 && deltaX < 0)) {
+      movePercent *= 0.2;
+    }
+
+    // Двигаем ленту напрямую через DOM
+    const translateValue = -(index * 100) + movePercent;
+    trackRef.current.style.transform = `translateX(${translateValue}%)`;
   };
 
   const handleTouchEnd = () => {
-    setIsDragging(false);
-    const minSwipeDistance = 50;
+    if (!isDragging.current || !trackRef.current) return;
+    isDragging.current = false;
 
-    if (touchDelta < -minSwipeDistance && index < images.length - 1) {
-      // Свайп влево -> следующее фото
-      setIndex(index + 1);
-    } else if (touchDelta > minSwipeDistance && index > 0) {
-      // Свайп вправо -> предыдущее фото
-      setIndex(index - 1);
+    // Получаем текущее смещение из style.transform
+    const style = window.getComputedStyle(trackRef.current);
+    const matrix = new WebKitCSSMatrix(style.transform);
+    const currentTranslate = matrix.m41; // смещение по X в пикселях
+    const width = trackRef.current.offsetWidth;
+    const currentPercent = (currentTranslate / width) * 100;
+
+    const minSwipePercent = 15; // Минимальный свайп для перелистывания (15% ширины)
+
+    let newIndex = index;
+    if (currentPercent < -(index * 100 + minSwipePercent) && index < images.length - 1) {
+      newIndex = index + 1;
+    } else if (currentPercent > -(index * 100 - minSwipePercent) && index > 0) {
+      newIndex = index - 1;
     }
-    
-    // Возвращаем картинку в исходное положение
-    setTouchDelta(0);
+
+    setIndex(newIndex);
   };
+
+  // Сброс позиции ленты, если свайп не удался
+  useEffect(() => {
+    if (!isDragging.current && trackRef.current) {
+      trackRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+      trackRef.current.style.transform = `translateX(-${index * 100}%)`;
+    }
+  }, [isDragging.current, index]);
 
   if (!product) return null;
 
@@ -113,18 +171,17 @@ export default function ProductModal({ product, onClose, onOrder }) {
           >
             {/* Лента картинок */}
             <div 
+              ref={trackRef}
               className="flex h-full w-full"
-              style={{
-                transform: `translateX(calc(-${index * 100}% + ${touchDelta}px))`,
-                transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
-              }}
+              style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {images.map((img, i) => (
                 <div key={i} className="h-full w-full shrink-0">
                   <img
                     src={img}
                     alt={`${product.name} — фото ${i + 1}`}
-                    className="pointer-events-none h-full w-full object-cover"
+                    className="pointer-events-none h-full w-full object-cover select-none"
+                    draggable={false}
                   />
                 </div>
               ))}
