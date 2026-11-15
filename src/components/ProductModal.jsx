@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Send, X } from "lucide-react";
 import { prepayFor } from "../data/content.js";
 import { PhotoNote } from "./ui.jsx";
@@ -8,6 +8,11 @@ const formatPrice = (value) =>
 
 export default function ProductModal({ product, onClose, onOrder }) {
   const [index, setIndex] = useState(0);
+  
+  // Рефы для отслеживания свайпа
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+  const minSwipeDistance = 50; // Минимальная длина свайпа в пикселях
 
   const images = product ? [product.img, ...(product.gallery || [])].filter(Boolean) : [];
 
@@ -35,6 +40,31 @@ export default function ProductModal({ product, onClose, onOrder }) {
       document.body.style.overflow = "";
     };
   }, [product, images.length, onClose]);
+
+  const handleTouchStart = (e) => {
+    touchEndX.current = null;
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // Свайп влево -> следующее фото
+      setIndex((i) => (i + 1) % images.length);
+    } else if (isRightSwipe) {
+      // Свайп вправо -> предыдущее фото
+      setIndex((i) => (i - 1 + images.length) % images.length);
+    }
+  };
 
   if (!product) return null;
 
@@ -65,11 +95,16 @@ export default function ProductModal({ product, onClose, onOrder }) {
 
         <div className="grid md:grid-cols-2">
           {/* галерея */}
-          <div className="relative aspect-[4/5] overflow-hidden bg-coal md:aspect-auto md:min-h-[560px]">
+          <div 
+            className="relative aspect-[4/5] touch-pan-y overflow-hidden bg-coal md:aspect-auto md:min-h-[560px]"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={images[index]}
               alt={`${product.name} — фото ${index + 1}`}
-              className="h-full w-full object-cover"
+              className="pointer-events-none h-full w-full object-cover"
             />
             <div className="absolute left-3 top-3">
               <PhotoNote updated={product.photoStatus === "studio"} />
@@ -81,7 +116,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
                   type="button"
                   onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
                   aria-label="Предыдущее фото"
-                  className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40"
+                  className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 md:flex"
                 >
                   <ChevronLeft size={16} strokeWidth={1.5} />
                 </button>
@@ -89,7 +124,7 @@ export default function ProductModal({ product, onClose, onOrder }) {
                   type="button"
                   onClick={() => setIndex((i) => (i + 1) % images.length)}
                   aria-label="Следующее фото"
-                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40"
+                  className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-white/15 bg-ink/70 text-bone backdrop-blur-md transition-colors hover:border-white/40 md:flex"
                 >
                   <ChevronRight size={16} strokeWidth={1.5} />
                 </button>
