@@ -42,6 +42,7 @@ export const NAV = [
   { label: "Мерки", href: "#measurements" },
   { label: "Доставка", href: "#delivery" },
   { label: "Вопросы", href: "#faq" },
+  { label: "Заявка", href: "#order" },
 ];
 
 /* ── Категории каталога ─────────────────────────────────────── */
