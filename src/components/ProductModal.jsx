@@ -123,16 +123,15 @@ export default function ProductModal({ product, onClose, onOrder }) {
       newIndex = index - 1;
     }
 
-    setIndex(newIndex);
-  };
-
-  // Сброс позиции ленты, если свайп не удался
-  useEffect(() => {
-    if (!isDragging.current && trackRef.current) {
+    if (newIndex !== index) {
+      setIndex(newIndex);
+    } else {
+      // Свайп не привёл к смене слайда — принудительно возвращаем ленту на место.
+      // setIndex с тем же значением не вызовет ре-рендер, поэтому правим DOM напрямую.
       trackRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
       trackRef.current.style.transform = `translateX(-${index * 100}%)`;
     }
-  }, [isDragging.current, index]);
+  };
 
   if (!product) return null;
 
