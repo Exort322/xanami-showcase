@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="relative flex min-h-screen min-h-[100svh] flex-col overflow-hidden"
     >
       <div className="absolute inset-0">
         <img
