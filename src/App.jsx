@@ -88,10 +88,10 @@ export default function App() {
         <Delivery />
         <Faq />
         <OrderForm
-          products={visible.length ? visible : (products || [])}
+          products={products || []}
           preset={preset}
           onPresetConsumed={() => setPreset(null)}
-        />
+/>
       </main>
 
       <Footer />
