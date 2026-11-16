@@ -1,5 +1,4 @@
 import { Send } from "lucide-react";
-import Logo from "./Logo.jsx";
 import { LINKS, TG_CHANNEL, TG_TAILOR } from "../data/content.js";
 
 export default function Footer() {
@@ -8,7 +7,7 @@ export default function Footer() {
       <div className="u-container">
         <div className="flex flex-col items-center gap-8 md:flex-row md:justify-between">
           <a href="#top" aria-label="XANAMI — наверх">
-            <Logo />
+            <img src="/assets/logo-mark.svg" alt="XANAMI" draggable="false" className="h-16 w-auto select-none" />
           </a>
 
           <nav

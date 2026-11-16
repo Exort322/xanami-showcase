@@ -99,7 +99,7 @@ export default function Hero() {
                   className="flex shrink-0 items-center gap-8 px-4 font-cond text-[11px] uppercase tracking-[0.3em] text-silver"
                 >
                   {text}
-                  <span className="text-blood">✦</span>
+                  <img src="/assets/logo-mark.svg" alt="" draggable="false" className="h-4 w-auto select-none" />
                 </span>
               ))}
             </div>
