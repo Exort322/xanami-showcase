@@ -125,8 +125,8 @@ export default function Catalog({ products, categories, onOpenProduct, category,
                   <img
                     src={item.img}
                     alt={item.name}
-                    loading="eager"
-                    decoding="sync"
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />

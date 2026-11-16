@@ -12,6 +12,8 @@ export default function Hero() {
         <img
           src="/assets/hero_veil.jpg"
           alt="Платье Veil of Ash — бордовый корсет с кружевом и фатой"
+          fetchpriority="high"
+          decoding="async"
           className="h-full w-full object-cover object-[center_20%] opacity-55 md:object-[center_28%]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/25" />
