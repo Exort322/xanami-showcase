@@ -40,11 +40,10 @@ export default function Navigation() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-700 ${
-          scrolled || open
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-700 ${scrolled || open
             ? "border-white/10 bg-ink/75 backdrop-blur-md"
             : "border-transparent bg-transparent"
-        }`}
+          }`}
       >
         <div className="u-container flex h-16 items-center justify-between gap-6 sm:h-20">
           <a href="#top" aria-label="XANAMI — наверх" className="shrink-0" onClick={close}>
@@ -61,9 +60,8 @@ export default function Navigation() {
               >
                 {item.label}
                 <span
-                  className={`absolute -bottom-2 left-0 right-0 h-px bg-blood transition-transform duration-500 ${
-                    active === item.href ? "scale-x-100" : "scale-x-0"
-                  }`}
+                  className={`absolute -bottom-2 left-0 right-0 h-px bg-blood transition-transform duration-500 ${active === item.href ? "scale-x-100" : "scale-x-0"
+                    }`}
                 />
               </a>
             ))}
@@ -98,26 +96,32 @@ export default function Navigation() {
       {/* Мобильное меню */}
       <div
         id="mobile-menu"
-        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-ink/95 backdrop-blur-xl transition-all duration-500 sm:top-20 lg:hidden ${
-          open ? "visible opacity-100" : "invisible opacity-0"
-        }`}
+        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-ink/95 backdrop-blur-xl transition-all duration-500 sm:top-20 lg:hidden ${open ? "visible opacity-100" : "invisible opacity-0"
+          }`}
       >
         <div className="u-container flex h-full flex-col justify-between overflow-y-auto py-10">
           <nav aria-label="Мобильная навигация" className="flex flex-col gap-6">
             {/* Теперь цикл автоматически выведет "Заявку", так как она есть в NAV */}
-            {NAV.map((item, i) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={close}
-                style={{ transitionDelay: open ? `${i * 80}ms` : "0ms" }}
-                className={`font-serif text-3xl font-light text-bone transition-all duration-700 ${
-                  open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
+            {NAV.map((item, i) => {
+              const isActive = active === item.href;
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={close}
+                  aria-current={isActive ? "page" : undefined}
+                  style={{ transitionDelay: open ? `${i * 80}ms` : "0ms" }}
+                  className={`relative flex items-center gap-4 font-serif text-3xl font-light transition-all duration-700 ${isActive ? "text-bone" : "text-bone/70"
+                    } ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+                >
+                  <span
+                    className={`h-px bg-blood transition-all duration-500 ${isActive ? "w-8 opacity-100" : "w-0 opacity-0"
+                      }`}
+                  />
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
           <div className="mt-10 flex flex-col gap-3">
