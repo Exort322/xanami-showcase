@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { PhotoNote, Reveal, SectionHead } from "./ui.jsx";
+import { pluralize } from "../lib/plural.js";
 
 const formatPrice = (value) =>
   value ? `${value.toLocaleString("ru-RU")} ₽` : "по запросу";
@@ -92,7 +93,7 @@ export default function Catalog({ products, categories, onOpenProduct, category,
         </div>
 
         <p className="mt-5 font-cond text-[10px] uppercase tracking-[0.22em] text-ash">
-          {isLoading ? "Загрузка..." : `${filtered.length} ${filtered.length === 1 ? "изделие" : "изделий"}`}
+          {isLoading ? "Загрузка..." : `${filtered.length} ${pluralize(filtered.length, "изделие", "изделия", "изделий")}`}
         </p>
 
         {/* Скелетон загрузки */}
