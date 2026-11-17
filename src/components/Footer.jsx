@@ -40,6 +40,9 @@ export default function Footer() {
             <p className="text-[11px] text-ash">
               Авторские эскизы · пошив под заказ · доставка СДЭК
             </p>
+            <p className="text-[11px] text-ash">
+              УНП: HE6178535
+            </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
