@@ -153,9 +153,9 @@ export function rowsToProducts(rows) {
     .filter(Boolean);
 }
 
-/** Возвращает каталог и список категорий */
+/** Возвращает каталог и список категорий (только из Google Таблицы). Если загрузка не удалась — бросает ошибку. */
 export async function loadCatalog(fallbackProducts, fallbackCategories) {
-  if (!SHEET_CSV_URL) return { products: fallbackProducts, categories: fallbackCategories };
+  if (!SHEET_CSV_URL) throw new Error("Google Sheets URL не указан");
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -167,7 +167,7 @@ export async function loadCatalog(fallbackProducts, fallbackCategories) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const items = rowsToProducts(parseCsv(await res.text()));
     
-    if (!items.length) return { products: fallbackProducts, categories: fallbackCategories };
+    if (!items.length) throw new Error("Google Таблица вернула пустой каталог");
 
     // Собираем уникальные категории из полученных товаров
     const categoriesMap = new Map();
@@ -187,7 +187,7 @@ export async function loadCatalog(fallbackProducts, fallbackCategories) {
     return { products: items, categories };
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn("Каталог из таблицы не загрузился, показываю локальный:", err);
-    return { products: fallbackProducts, categories: fallbackCategories };
+    // Перебрасываем ошибку со строгим сообщением для UI
+    throw err instanceof Error ? err : new Error("Не удалось загрузить витрину");
   }
 }

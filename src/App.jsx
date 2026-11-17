@@ -12,6 +12,7 @@ import Delivery from "./components/Delivery.jsx";
 import Faq from "./components/Faq.jsx";
 import OrderForm from "./components/OrderForm.jsx";
 import Footer from "./components/Footer.jsx";
+import ErrorWindow from "./components/ErrorWindow.jsx";
 
 import { PRODUCTS, CATEGORIES } from "./data/content.js";
 import { loadCatalog } from "./lib/sheet.js";
@@ -20,23 +21,37 @@ export default function App() {
   const [products, setProducts] = useState(null);
   const [categories, setCategories] = useState(CATEGORIES);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [category, setCategory] = useState("all");
   const [active, setActive] = useState(null);
   const [preset, setPreset] = useState(null);
 
   useEffect(() => {
     let alive = true;
-    loadCatalog(PRODUCTS, CATEGORIES).then(({ products: loadedProducts, categories: loadedCategories }) => {
-      if (alive) {
-        setProducts(loadedProducts);
-        setCategories(loadedCategories);
-        setLoading(false);
-      }
-    });
+    setLoading(true);
+    setLoadError(null);
+    loadCatalog(PRODUCTS, CATEGORIES)
+      .then(({ products: loadedProducts, categories: loadedCategories }) => {
+        if (alive) {
+          setProducts(loadedProducts);
+          setCategories(loadedCategories);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (alive) {
+          console.warn("Ошибка загрузки витрины:", err);
+          setProducts(null);
+          setCategories(CATEGORIES);
+          setLoadError("Не удалось загрузить витрину, проверьте соединение с интернетом.");
+          setLoading(false);
+        }
+      });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [retryKey]);
 
   const openCategory = useCallback((id) => {
     setCategory(id);
@@ -60,6 +75,10 @@ export default function App() {
     setActive(null);
     const el = document.getElementById("order");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const retryLoad = useCallback(() => {
+    setRetryKey((prev) => prev + 1);
   }, []);
 
   const visible = useMemo(
@@ -95,6 +114,14 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {loadError && (
+        <ErrorWindow
+          error={loadError}
+          onClose={() => setLoadError(null)}
+          onRetry={retryLoad}
+        />
+      )}
 
       <ProductModal
         product={active}
