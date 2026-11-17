@@ -12,7 +12,6 @@ import Delivery from "./components/Delivery.jsx";
 import Faq from "./components/Faq.jsx";
 import OrderForm from "./components/OrderForm.jsx";
 import Footer from "./components/Footer.jsx";
-import ErrorWindow from "./components/ErrorWindow.jsx";
 
 import { PRODUCTS, CATEGORIES } from "./data/content.js";
 import { loadCatalog } from "./lib/sheet.js";
@@ -98,6 +97,8 @@ export default function App() {
           products={products || []}
           categories={categories} // <-- Передаем категории
           isLoading={loading}
+          error={loadError}
+          onRetry={retryLoad}
           category={category}
           onCategory={setCategory}
           onOpenProduct={openProduct}
@@ -115,13 +116,6 @@ export default function App() {
 
       <Footer />
 
-      {loadError && (
-        <ErrorWindow
-          error={loadError}
-          onClose={() => setLoadError(null)}
-          onRetry={retryLoad}
-        />
-      )}
 
       <ProductModal
         product={active}

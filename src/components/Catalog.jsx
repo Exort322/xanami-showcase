@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { PhotoNote, Reveal, SectionHead } from "./ui.jsx";
+import ErrorWindow from "./ErrorWindow.jsx";
 import { pluralize } from "../lib/plural.js";
 
 const formatPrice = (value) =>
   value ? `${value.toLocaleString("ru-RU")} ₽` : "по запросу";
 
-export default function Catalog({ products, categories, onOpenProduct, category, onCategory, isLoading }) {
+export default function Catalog({ products, categories, onOpenProduct, category, onCategory, isLoading, error, onRetry }) {
   const [sort, setSort] = useState("default");
 
   const filtered = useMemo(() => {
@@ -93,11 +94,13 @@ export default function Catalog({ products, categories, onOpenProduct, category,
         </div>
 
         <p className="mt-5 font-cond text-[10px] uppercase tracking-[0.22em] text-ash">
-          {isLoading ? "Загрузка..." : `${filtered.length} ${pluralize(filtered.length, "изделие", "изделия", "изделий")}`}
+          {error ? "" : isLoading ? "Загрузка..." : `${filtered.length} ${pluralize(filtered.length, "изделие", "изделия", "изделий")}`}
         </p>
 
         {/* Скелетон загрузки */}
-        {isLoading ? (
+        {error && !isLoading ? (
+          <ErrorWindow error={error} onRetry={onRetry} />
+        ) : isLoading ? (
           <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex flex-col bg-ink border border-white/10">
@@ -178,7 +181,7 @@ export default function Catalog({ products, categories, onOpenProduct, category,
           </div>
         )}
 
-        {!isLoading && !filtered.length && (
+        {!isLoading && !error && !filtered.length && (
           <p className="mt-10 text-center text-sm text-ash">
             В этой категории пока пусто.
           </p>
