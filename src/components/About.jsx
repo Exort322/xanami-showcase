@@ -13,8 +13,7 @@ export default function About() {
             <SectionHead
               index="01"
               eyebrow="О мастерской"
-              title="Одна мастерская,"
-              accent="одна пара рук"
+              title="Роскошь темной стороны"
               note=""
             />
           </div>
